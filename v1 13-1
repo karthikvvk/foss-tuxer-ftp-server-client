@@ -1,0 +1,31 @@
+import os
+from pyftpdlib.authorizers import DummyAuthorizer
+from pyftpdlib.handlers import FTPHandler
+from pyftpdlib.servers import FTPServer
+
+# Configuration
+FTP_USER = "Rothith"          # Username for FTP login
+FTP_PASSWORD = "RohithS"   # Password for FTP login
+FTP_PORT = 21                 # FTP Port (21 is the default FTP port)
+FTP_DIRECTORY = "ftp_storage" # Directory for FTP files
+CERT_FILE = "certs/cert.pem"  # Path to SSL Certificate
+
+# Ensure FTP storage directory exists
+if not os.path.exists(FTP_DIRECTORY):
+    os.makedirs(FTP_DIRECTORY)
+
+# Create FTP user with full permissions
+authorizer = DummyAuthorizer()
+authorizer.add_user(FTP_USER, FTP_PASSWORD, FTP_DIRECTORY, perm="elradfmw")  # Full access
+
+# Secure FTP Handler with TLS encryption
+handler = FTPHandler
+handler.certfile = CERT_FILE
+handler.authorizer = authorizer
+handler.tls_control_required = True  # Encrypt login
+handler.tls_data_required = True     # Encrypt data transfer
+
+# Start FTP Server
+server = FTPServer(("0.0.0.0", FTP_PORT), handler)
+print(f"✅ Secure FTP Server Running on Port {FTP_PORT} (FTPS Enabled)")
+server.serve_forever()
