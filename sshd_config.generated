@@ -1,0 +1,17 @@
+
+Port 22
+AddressFamily any
+ListenAddress 0.0.0.0
+PermitRootLogin yes
+PasswordAuthentication no
+PubkeyAuthentication yes
+PermitEmptyPasswords no
+UsePAM no
+MaxAuthTries 6
+MaxSessions 10
+DenyUsers ftpuser
+
+Subsystem sftp internal-sftp
+Match User ftpuser
+    ChrootDirectory /var/www/
+    ForceCommand internal-sftp
