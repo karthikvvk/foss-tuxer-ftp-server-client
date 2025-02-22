@@ -31,6 +31,7 @@ def apply_configuration(config_content, file_path):
 def get_public_ip():
     try:
         response = requests.get('https://ifconfig.me')
+        print(response)
         if response.status_code == 200:
             return response.text.strip()
         else:
