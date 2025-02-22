@@ -31,7 +31,7 @@ def apply_configuration(config_content, file_path):
 def get_public_ip():
     try:
         response = requests.get('https://ifconfig.me')
-        print(response)
+        print(response.text)
         if response.status_code == 200:
             return response.text.strip()
         else:
@@ -260,18 +260,23 @@ pam_service_name=vsftpd
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        connect_host = st.text_input("FTP Server IP", value=0)
+        if 'connect_host' not in st.session_state:
+            st.session_state.connect_host = "0.0.0.0"  # Default value
+        connect_host = st.text_input("FTP Server IP", value=st.session_state.connect_host)
+    
     with col2:
         connect_port = st.number_input("Connection Port", value=21, min_value=1, max_value=65535)
+    
     with col3:
         if st.button("🔄 Fetch Public IP", key="connect_fetch_ip"):
-            connect_host = get_public_ip()
-            if connect_host:
-                st.session_state.connect_host = connect_host
-                st.rerun()
+            fetched_ip = get_public_ip()
+            if fetched_ip:
+                st.session_state.connect_host = fetched_ip  # Update session state with the fetched IP
+                st.rerun()  # Rerun the app to update the input field
+    
     if st.button("🔌 Connect to FTP Server"):
         with st.spinner("Attempting to connect to FTP server..."):
-            connect_ftp(connect_host, ftp_username, ftp_password, connect_port)
+            connect_ftp(st.session_state.connect_host, ftp_username, ftp_password, connect_port)
     
     # Server Control Panel at the bottom
     st.markdown("---")
