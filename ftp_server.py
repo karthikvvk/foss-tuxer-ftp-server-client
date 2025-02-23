@@ -88,6 +88,69 @@ def server_control_panel():
 
 
 
+
+import subprocess
+import streamlit as st
+
+def run_command(command):
+    result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if result.returncode == 0:
+        st.success(f"Command succeeded: {command}")
+    else:
+        st.error(f"Command failed: {command}\n{result.stderr}")
+
+if st.button("Quick Server Hosting"):
+    commands = [
+        "sudo apt install -y vsftpd",
+        "sudo systemctl enable --now vsftpd",
+        "sudo ufw allow 20/tcp",
+        "sudo ufw allow 21/tcp",
+        "sudo ufw allow 990/tcp",
+        "sudo ufw allow 5000:10000/tcp",
+        "sudo adduser --disabled-password --gecos \"\" ftpuser",
+        "echo 'ftpuser:2345' | sudo chpasswd",
+        "sudo bash -c 'echo DenyUsers ftpuser >> /etc/ssh/sshd_config'",
+        "sudo systemctl restart sshd",
+        "sudo mkdir /ftp",
+        "sudo chown ftpuser:ftpuser /ftp",
+        "sudo bash -c 'cat <<EOF > /etc/vsftpd.conf\n\
+anonymous_enable=NO\n\
+local_enable=YES\n\
+write_enable=YES\n\
+pasv_min_port=5000\n\
+pasv_max_port=10000\n\
+local_root=/ftp\n\
+chroot_local_user=YES\n\
+chroot_list_enable=YES\n\
+chroot_list_file=/etc/vsftpd.chroot_list\n\
+allow_writeable_chroot=YES\n\
+local_umask=0002\n\
+ssl_enable=YES\n\
+rsa_cert_file=/etc/ssl/private/vsftpd.pem\n\
+rsa_private_key_file=/etc/ssl/private/vsftpd.pem\n\
+allow_anon_ssl=NO\n\
+force_local_data_ssl=YES\n\
+force_local_logins_ssl=YES\n\
+ssl_tlsv1=YES\n\
+ssl_sslv2=NO\n\
+ssl_sslv3=NO\n\
+require_ssl_reuse=NO\n\
+ssl_ciphers=HIGH\n\
+EOF'",
+        "sudo touch /etc/vsftpd.chroot_list",
+        "sudo bash -c 'echo ftpuser >> /etc/vsftpd.chroot_list'",
+        "sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/vsftpd.pem -out /etc/ssl/private/vsftpd.pem -subj \"/C=IN/ST=Delhi/L=Delhi/O=my/OU=main/CN=myftp/emailAddress=ftpuser@gmail.com\"",
+        "sudo systemctl restart --now vsftpd"
+    ]
+
+    for command in commands:
+        run_command(command)
+
+
+
+
+
+
 def connect_ftp(host, port=21, username="anonymous", password=""):
     try:
         ftp = FTP()
@@ -104,10 +167,89 @@ def connect_ftp(host, port=21, username="anonymous", password=""):
         return False
 
 
+def apply_default_configuration():
+    default_config_steps = [
+        ("Install VSFTPD", "sudo apt install vsftpd"),
+        ("Enable VSFTPD", "sudo systemctl enable --now vsftpd"),
+        ("Configure Firewall", """sudo ufw allow 20/tcp
+sudo ufw allow 21/tcp
+sudo ufw allow 990/tcp
+sudo ufw allow 5000:10000/tcp"""),
+        ("Create FTP User", "sudo adduser ftpuser"),
+        ("Configure SSH", """sudo nano /etc/ssh/sshd_config
+DenyUsers ftpuser
+sudo systemctl restart sshd"""),
+        ("Setup FTP Directory", """sudo mkdir /ftp
+sudo chown adminuser /ftp"""),
+        ("Configure VSFTPD", """anonymous_enable=NO
+local_enable=YES
+write_enable=YES
+pasv_min_port=5000
+pasv_max_port=10000
+local_root=/ftp 
+chroot_local_user=YES
+chroot_list_enable=YES
+chroot_list_file=/etc/vsftpd.chroot_list
+allow_writeable_chroot=YES
+local_umask=0002"""),
+        ("Setup SSL Certificate", """sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/vsftpd.pem -out /etc/ssl/private/vsftpd.pem"""),
+        ("Configure SSL Settings", """rsa_cert_file=/etc/ssl/private/vsftpd.pem
+rsa_private_key_file=/etc/ssl/private/vsftpd.pem
+ssl_enable=YES
+allow_anon_ssl=NO
+force_local_data_ssl=YES
+force_local_logins_ssl=YES
+ssl_tlsv1=YES
+ssl_sslv2=NO
+ssl_sslv3=NO
+require_ssl_reuse=NO
+ssl_ciphers=HIGH""")
+    ]
+    
+    # Get sudo password
+    sudo_password = st.text_input("Enter sudo password to apply configuration:", type="password")
+    
+    if st.button("Apply Default Configuration"):
+        if not sudo_password:
+            st.error("Password is required to proceed.")
+            return
+        
+        try:
+            for step_name, config in default_config_steps:
+                with st.status(f"Applying {step_name}..."):
+                    if 'nano' in config:
+                        st.code(config, language="bash")
+                        st.info("This step requires manual editing. Please copy the configuration and apply it manually.")
+                        continue
+                    
+                    command = f'echo {sudo_password} | sudo -S bash -c "{config}"'
+                    process = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
+                    st.success(f"✅ {step_name} completed successfully!")
+                    
+            st.success("🎉 Default configuration applied successfully!")
+            
+        except subprocess.CalledProcessError as e:
+            st.error(f"Failed to apply configuration: {str(e)}")
+            st.error(f"Error output: {e.stderr}")
+
 
 def server_config_page():
     st.title("Server Configuration Panel")
     
+    st.title("Server Configuration Panel")
+    
+    # Add Default Configuration Section
+    st.header("Quick Setup")
+    with st.expander("Default Server Configuration"):
+        st.write("This will apply a secure default configuration for your FTP server.")
+        st.info("""This will:
+        1. Install and enable VSFTPD
+        2. Configure firewall rules
+        3. Create FTP user and directory
+        4. Set up SSL/TLS encryption
+        5. Apply secure default settings""")
+        apply_default_configuration()
+
     if 'enable_ssh' not in st.session_state:
         st.session_state.enable_ssh = False
     
