@@ -1,9 +1,18 @@
+
+from pathlib import Path
+import base64
+from datetime import datetime
+
 from ftplib import FTP
 import streamlit as st
 import os
 import subprocess
 from streamlit_option_menu import option_menu
 import requests
+import sys
+import pwd
+from pathlib import Path
+
 
 
 def ensure_directory_exists(filepath):
@@ -14,8 +23,6 @@ def ensure_directory_exists(filepath):
 def apply_configuration(config_content, file_path):
 
 
-    file_path = "path/to/your/config_file.conf"  # Replace with your actual file path
-    config_content = "your configuration content here"  # Replace with your actual configuration content
 
     try:
         # Use subprocess to echo the content into the file
@@ -281,6 +288,12 @@ pam_service_name=vsftpd
     # Server Control Panel at the bottom
     st.markdown("---")
     server_control_panel()
+
+
+
+
+
+
 
 def main():
     st.set_page_config(page_title="🔐 Server Configuration Panel", layout="wide")
