@@ -1,18 +1,12 @@
 
-from pathlib import Path
-import base64
-from datetime import datetime
 
 from ftplib import FTP
 import streamlit as st
 import os
 import subprocess
-from streamlit_option_menu import option_menu
 import requests
-import sys
-import pwd
-from pathlib import Path
 
+from pathlib import Path
 
 
 def ensure_directory_exists(filepath):
@@ -20,20 +14,31 @@ def ensure_directory_exists(filepath):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+
+
+
+
 def apply_configuration(config_content, file_path):
+    st.subheader("Administrator Permission Required")
 
+    # Ask user for their sudo password
+    sudo_password = st.text_input("Enter your sudo password:", type="password")
 
+    if st.button("Apply Configuration"):
+        if not sudo_password:
+            st.error("❌ Password is required to proceed.")
+            return
 
-    try:
-        # Use subprocess to echo the content into the file
-        # Note: Using shell=True can be a security risk if you're using untrusted input
-        command = f'echo "{config_content}" > {file_path}'
-        subprocess.run(command, shell=True, check=True)
-        
-        st.success(f"✅ Configuration applied successfully to {file_path}!")
-    except subprocess.CalledProcessError as e:
-        st.error(f"❌ Failed to apply configuration: {str(e)}")
-        st.info("Make sure you have the necessary permissions to modify the configuration file.")
+        try:
+            # Use echo to pass the password to sudo
+            command = f'echo {sudo_password} | sudo -S tee -a {file_path}'
+            process = subprocess.run(command, input=config_content, text=True, shell=True, check=True)
+
+            st.success(f"✅ Configuration applied successfully to {file_path}!")
+        except subprocess.CalledProcessError as e:
+            st.error(f"❌ Failed to apply configuration: {str(e)}")
+            st.info("Make sure the password is correct and you have sudo privileges.")
+
 
 def get_public_ip():
     try:
@@ -81,12 +86,15 @@ def server_control_panel():
             except subprocess.CalledProcessError as e:
                 st.error(f"Failed to restart server: {str(e)}")
 
-def connect_ftp(host, username, password, port=21):
+
+
+def connect_ftp(host, port=21, username="anonymous", password=""):
     try:
         ftp = FTP()
         ftp.connect(host=host, port=port)
-        ftp.login(user=username, passwd=password)
-        st.success(f"✅ Successfully connected to FTP server at {host}!")
+        ftp.login(user=username, passwd=password)  # Anonymous login by default
+        st.success(f"✅ Successfully connected to FTP server at {host} as anonymous!")
+        
         # Display some server info
         st.info(f"Server response: {ftp.getwelcome()}")
         ftp.quit()
@@ -94,6 +102,8 @@ def connect_ftp(host, username, password, port=21):
     except Exception as e:
         st.error(f"❌ Failed to connect to FTP server: {str(e)}")
         return False
+
+
 
 def server_config_page():
     st.title("Server Configuration Panel")
