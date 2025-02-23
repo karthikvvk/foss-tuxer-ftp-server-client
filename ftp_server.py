@@ -448,7 +448,7 @@ pam_service_name=vsftpd
 
 
 def main():
-    st.set_page_config(page_title="🔐 Server Configuration Panel", layout="wide")
+    st.set_page_config(page_title="🔐 Serveset_pager Configuration Panel", layout="wide")
     server_config_page()
 
 if __name__ == "__main__":
