@@ -1,36 +1,59 @@
-This application combines two main functionalities:
+# VSFTPD Quick Launch GUI
 
-Ease of Use for Complex Software: Our app simplifies the use of powerful software that is typically limited to command-line interfaces (CLI). By providing a graphical user interface (GUI) and information highlights (ℹ️ icon), we describe various parameters and features, making it more accessible.
+## Overview
+This application simplifies the use of **VSFTPD (Very Secure FTP Daemon)** by providing an intuitive **Graphical User Interface (GUI)**. It eliminates the need for complex **command-line interfaces (CLI)**, making FTP server setup quick and hassle-free.
 
-Quick Launch Interface: We have implemented a quick launch interface that instantly hosts an FTP server based on inputs such as:
+## Key Features
 
-Remote availability/local only
-SSH/TLS/SSL connection
-User type and rights
-All these parameters are predefined, so no configuration is needed. With just one click, you can host an FTP server locally on your home machine.
+### **Ease of Use for Complex Software**
+- Provides a **GUI-based** approach to configure and launch VSFTPD.
+- Each parameter has an **information icon (ℹ️)** to explain its purpose.
 
-Key Features:
-Graphical User Interface (GUI): The app uses Streamlit to provide a user-friendly GUI, making it easier to interact with complex software.
-Information Highlights: Each parameter or feature is accompanied by an information icon (ℹ️) that provides detailed descriptions, helping users understand their options.
-Quick Launch Setup: A single-click setup for VSFTPD (Very Secure FTP Daemon) that configures and starts the FTP server with predefined settings.
-Predefined Parameters: The app comes with predefined parameters for various configurations, eliminating the need for manual setup.
-Local Hosting: The FTP server can be hosted locally on your home machine with just one click.
+### **Quick Launch Interface**
+- One-click setup for **VSFTPD** with predefined configurations.
+- Instantly hosts an FTP server based on user inputs such as:
+  - **Remote availability** (Local Only or Remote Access)
+  - **SSH/TLS/SSL connection** options
+  - **User type and rights** management
 
-Usage:
-VSFTPD Quick Setup:
+### **Predefined Parameters**
+- No manual configuration is needed.
+- **Default settings** ensure a hassle-free setup experience.
 
-The app displays a title and a button to start the quick setup.
-When the button is clicked, the quiclaunch() function is executed, which sets up VSFTPD step by step automatically.
-Server Configuration Panel:
+### **Local Hosting**
+- Instantly launch an FTP server on your **home machine** with a single click.
 
-The app provides a comprehensive server configuration panel where users can configure network settings, SSH settings, FTP server settings, and more.
-Each setting is accompanied by an information icon (ℹ️) that provides detailed descriptions.
-Server Control Panel:
+## Usage Guide
 
-Users can start, stop, or restart the server using the control panel.
-The control panel provides real-time feedback on the server status.
+### 1. **VSFTPD Quick Setup**
+- Click the **Quick Launch** button.
+- The `quicklaunch()` function executes a step-by-step **automated setup**.
 
-This project aims to make powerful software more accessible by providing a user-friendly interface and simplifying the setup process.
+### 2. **Server Configuration Panel**
+- Customize network settings, SSH configurations, FTP permissions, and more.
+- Information icons (ℹ️) provide detailed descriptions for each setting.
 
+### 3. **Server Control Panel**
+- **Start**, **Stop**, or **Restart** the FTP server with a single click.
+- Real-time status updates for server monitoring.
 
-demo[https://drive.google.com/drive/folders/1cb3L_gAJyFmIXC55Xk67S5OIIL5PqzOa?usp=sharing]
+## Demo
+Check out the demo here: [Demo Link](https://drive.google.com/drive/folders/1cb3L_gAJyFmIXC55Xk67S5OIIL5PqzOa?usp=sharing)
+
+## Getting Started
+1. **Install Dependencies** (Make sure Python & Streamlit are installed)
+   ```sh
+   pip install streamlit
+   ```
+2. **Run the Application**
+   ```sh
+   streamlit run app.py
+   ```
+
+## Technologies Used
+- **Streamlit** (For GUI)
+- **VSFTPD** (For FTP server)
+- **Python** (For automation)
+
+## Contributing
+Contributions are welcome! Feel free to submit issues and pull requests.
